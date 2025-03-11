@@ -651,6 +651,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71f256de6dcdf04e8ea38d53809b36a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 4
+  Ana: {fileID: 9079184268987887213, guid: e010ab3f92488f54ca844314a7910d2a, type: 3}
 --- !u!114 &2029014196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -688,7 +690,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 84
+  m_Constraints: 116
   m_CollisionDetection: 0
 --- !u!114 &2029014198
 MonoBehaviour:
