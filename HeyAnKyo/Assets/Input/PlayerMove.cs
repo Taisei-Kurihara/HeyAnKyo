@@ -68,50 +68,39 @@ public class PlayerMove : MonoBehaviour
 
     float AnaSize = 5;
 
-    bool AnaHoribool = false;
-
+    BitArray AnaHoribool = new BitArray(2,false);
 
     public void OnAnaHori(InputAction.CallbackContext context)
     {
-        if(!AnaHoribool)
-        {
-            AnaHoribool = true;
-            AnaCheck();
-        }
+        AnaCheck();
+        AnaHoribool = new BitArray(2, true);
     }
 
     public void OutAnaHori(InputAction.CallbackContext context)
     {
-        AnaHoribool = false;
+
+        AnaHoribool = new BitArray(2, false);
     }
 
-    /// <summary>
-    /// フェード処理（時間に応じたフェード率の計算）
-    /// </summary>
-    /// <param name="maxTime">フェード時間</param>
-    /// <param name="AbsmaxTime">フェードの絶対時間</param>
-    /// <param name="time">現在の経過時間</param>
-    IEnumerator FadeWait(float maxTime, float AbsmaxTime, float time = 0)
+    IEnumerator AnaHoriInputEndWait()
     {
-        // フェードの実行判定
-        if (AnaHoribool)
+        yield return new WaitUntil(() => !AnaHoribool[0] || !AnaHoribool[1]);
+        AnaHoriEnd();
+    }
+
+    void AnaHoriEndWait() { AnaHoribool[1] = false; }
+
+    void AnaHoriEnd()
+    {
+        if (nowAna != null)
         {
-            yield return new WaitForSeconds(1/30);
-
-            // 最大時間を超えないように時間を加算
-            time = Mathf.Min(time + Time.deltaTime, AbsmaxTime);
-
-            // フェード比率を計算（フェードイン: 0→1, フェードアウト: 1→0）
-            float fadePerc = Mathf.Abs((time / AbsmaxTime) - ((maxTime <= 0) ? 1 : 0));
-            AnaHori(fadePerc);
-
-            // フェードが完了するまで再帰的に実行
-            if (time < AbsmaxTime) { StartCoroutine(FadeWait(maxTime, AbsmaxTime, time)); }
+            AnaAke anaAke = nowAna.GetComponent<AnaAke>();
+            anaAke.AnaUme(AnaHoriTime);
         }
-        else
-        {
-            Destroy(nowAna);
-        }
+
+        Input.EnableInput(PlayerInputNames.Move);
+        nowAna = null;
+
     }
 
     public void AnaCheck()
@@ -119,9 +108,17 @@ public class PlayerMove : MonoBehaviour
         RaycastHit hit;
 
         // レイキャストの実行
-        if (Physics.Raycast(transform.position, transform.forward, out hit, AnaSize))
+        if (Physics.Raycast(transform.position + (transform.forward * 2), transform.forward, out hit, AnaSize/2))
         {
-            StartCoroutine(FadeWait(-AnaHoriTime, AnaHoriTime));
+            // オブジェクトを生成
+            AnaAke anaAke = hit.collider.GetComponent<AnaAke>();
+            if (anaAke != null)
+            {
+                anaAke.AnaUme(AnaHoriTime);
+
+                Input.DisableInput(PlayerInputNames.Move);
+                Invoke(nameof(AnaHoriEndWait), AnaHoriTime);
+            }
         }
         else
         {
@@ -130,16 +127,13 @@ public class PlayerMove : MonoBehaviour
 
             // オブジェクトを生成
             nowAna = Instantiate(Ana, spawnPosition, transform.rotation);
+            AnaAke anaAke = nowAna.GetComponent<AnaAke>();
+            anaAke.AnaHoriStart(AnaSize, AnaHoriTime);
 
-            StartCoroutine(FadeWait(AnaHoriTime, AnaHoriTime));
+            Input.DisableInput(PlayerInputNames.Move);
+            Invoke(nameof(AnaHoriEndWait), AnaHoriTime);
+
         }
-    }
-
-    public void AnaHori(float time)
-    {
-        //Debug.Log("Ana:"+ time);
-        nowAna.transform.localScale = new Vector3(AnaSize * time,1,AnaSize * time);
-        if(time == 1) { nowAna = null; }
     }
     #endregion
 }

@@ -95,13 +95,12 @@ public class Input : MonoBehaviour
 
     #region 入力の有効化/無効化
     /// <summary> 入力を有効化 </summary>
-    protected void AllOn() { input.actions.Enable(); }
+    public void AllOn() { input.actions.Enable(); }
     /// <summary> 入力を無効化 </summary>
-    protected void AllOff() { input.actions.Disable(); }
-
+    public void AllOff() { input.actions.Disable(); }
 
     /// <summary> 指定した入力を有効化 </summary>
-    protected void EnableInput(Enum inputName)
+    public void EnableInput(Enum inputName)
     {
         int index = inputName.GetHashCode();
         if (index >= 0 && index < actions.Length && actions[index] != null)
@@ -111,7 +110,7 @@ public class Input : MonoBehaviour
     }
 
     /// <summary> 指定した入力を無効化 </summary>
-    protected void DisableInput(Enum inputName)
+    public void DisableInput(Enum inputName)
     {
         int index = inputName.GetHashCode();
         if (index >= 0 && index < actions.Length && actions[index] != null)
