@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using UnityEngine.Events;
 using Unity.VisualScripting;
+using UnityEngine.InputSystem.HID;
 public class PlayerMove : MonoBehaviour
 {
     Input Input;
@@ -68,56 +69,59 @@ public class PlayerMove : MonoBehaviour
 
     float AnaSize = 5;
 
-    BitArray AnaHoribool = new BitArray(2,false);
+    bool AnaHoribool = false;
 
     public void OnAnaHori(InputAction.CallbackContext context)
     {
+        AnaHoribool = true;
         AnaCheck();
-        AnaHoribool = new BitArray(2, true);
     }
 
     public void OutAnaHori(InputAction.CallbackContext context)
     {
-
-        AnaHoribool = new BitArray(2, false);
-    }
-
-    IEnumerator AnaHoriInputEndWait()
-    {
-        yield return new WaitUntil(() => !AnaHoribool[0] || !AnaHoribool[1]);
-        AnaHoriEnd();
-    }
-
-    void AnaHoriEndWait() { AnaHoribool[1] = false; }
-
-    void AnaHoriEnd()
-    {
-        if (nowAna != null)
-        {
+        if(nowAna != null) {
             AnaAke anaAke = nowAna.GetComponent<AnaAke>();
             anaAke.AnaUme(AnaHoriTime);
         }
 
+        AnaHoribool = false;
+    }
+
+    IEnumerator AnaHoriEndWait()
+    {        
+        // 開始時間を取得
+        DateTime startTime = DateTime.Now;
+
+        yield return new WaitUntil(() => !AnaHoribool || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
+
+        Debug.Log((float)(startTime - DateTime.Now).TotalSeconds);
+
+        AnaHoriEnd();
+    }
+
+    void AnaHoriEnd()
+    {
         Input.EnableInput(PlayerInputNames.Move);
         nowAna = null;
 
     }
 
     public void AnaCheck()
-    {// レイキャストの結果を格納する変数
+    {
+        Input.DisableInput(PlayerInputNames.Move);
+        StartCoroutine(AnaHoriEndWait());
+
+        // レイキャストの結果を格納する変数
         RaycastHit hit;
 
         // レイキャストの実行
-        if (Physics.Raycast(transform.position + (transform.forward * 2), transform.forward, out hit, AnaSize/2))
+        if (Physics.Raycast(transform.position + (transform.forward * -0.1f), transform.forward, out hit, AnaSize/2))
         {
-            // オブジェクトを生成
-            AnaAke anaAke = hit.collider.GetComponent<AnaAke>();
+            Debug.Log(hit.collider.gameObject.name);
+            AnaAke anaAke = hit.collider.gameObject.GetComponent<AnaAke>();
             if (anaAke != null)
             {
                 anaAke.AnaUme(AnaHoriTime);
-
-                Input.DisableInput(PlayerInputNames.Move);
-                Invoke(nameof(AnaHoriEndWait), AnaHoriTime);
             }
         }
         else
@@ -130,8 +134,6 @@ public class PlayerMove : MonoBehaviour
             AnaAke anaAke = nowAna.GetComponent<AnaAke>();
             anaAke.AnaHoriStart(AnaSize, AnaHoriTime);
 
-            Input.DisableInput(PlayerInputNames.Move);
-            Invoke(nameof(AnaHoriEndWait), AnaHoriTime);
 
         }
     }

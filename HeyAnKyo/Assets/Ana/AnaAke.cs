@@ -6,9 +6,8 @@ public class AnaAke : MonoBehaviour
 {
 
 
-    bool AnaHoribool = true;
+    BitArray AnaHoribool = new BitArray(4,true);
 
-    public void AnaHoriEnd() {  AnaHoribool = false; }
 
     float AnaSize = 5;
 
@@ -20,7 +19,13 @@ public class AnaAke : MonoBehaviour
 
     public void AnaUme(float AnaHoriTime)
     {
-        StartCoroutine(FadeWait(AnaHoriTime*-1, AnaHoriTime));
+        if (AnaHoribool[3])
+        {
+            AnaHoribool[1] = AnaHoribool[2];
+            AnaHoribool[0] = !AnaHoribool[2];
+        }
+
+        AnaHoribool[3] = false;
     }
 
     /// <summary>
@@ -32,7 +37,7 @@ public class AnaAke : MonoBehaviour
     IEnumerator FadeWait(float maxTime, float AbsmaxTime, float time = 0)
     {
         // フェードの実行判定
-        if (AnaHoribool)
+        if (AnaHoribool[0])
         {
             yield return new WaitForSeconds(1 / 30);
 
@@ -40,22 +45,40 @@ public class AnaAke : MonoBehaviour
             time = Mathf.Min(time + Time.deltaTime, AbsmaxTime);
 
             // フェード比率を計算（フェードイン: 0→1, フェードアウト: 1→0）
-            float fadePerc = Mathf.Abs((time / AbsmaxTime) - ((maxTime <= 0) ? 1 : 0));
-            AnaHori(fadePerc);
+            float fadeperc = Mathf.Abs((time / AbsmaxTime) - ((maxTime <= 0) ? 1 : 0));
+            AnaHori(fadeperc);
 
             // フェードが完了するまで再帰的に実行
             if (time < AbsmaxTime) { StartCoroutine(FadeWait(maxTime, AbsmaxTime, time)); }
+            else
+            {
+                if (AnaHoribool[1])
+                {
+                    AnaHoribool[2] = false;
+                    yield return new WaitUntil(() => !AnaHoribool[1]);
+                    AnaHoribool[0] = true;
+                    StartCoroutine(FadeWait(maxTime * -1, AbsmaxTime));
+                }
+                else
+                {
+                    Destroy(gameObject);
+                }
+            }
         }
         else
         {
-            AnaHoribool = true;
-            FadeWait(maxTime * -1, AbsmaxTime, (((time / AbsmaxTime) - 1) * -1) * AbsmaxTime);
+            if (AnaHoribool[1])
+            {
+                AnaHoribool[0] = true;
+                AnaHoribool[1] = false;
+                StartCoroutine(FadeWait(maxTime * -1, AbsmaxTime, (time - AbsmaxTime) * -1));
+            }
         }
     }
 
-    void AnaHori(float time)
+    void AnaHori(float fadeperc)
     {
         //Debug.Log("Ana:"+ time);
-        this.transform.localScale = new Vector3(AnaSize * time, 1, AnaSize * time);
+        this.transform.localScale = new Vector3(AnaSize * fadeperc, 1, AnaSize * fadeperc);
     }
 }
