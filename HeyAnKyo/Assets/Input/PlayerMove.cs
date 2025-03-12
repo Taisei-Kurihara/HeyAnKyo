@@ -9,7 +9,9 @@ public class PlayerMove : MonoBehaviour
 {
     Input Input;
     Rigidbody rb;
-    
+
+    [SerializeField]
+    Animator animator;
 
 
     // Start is called before the first frame update
@@ -36,7 +38,7 @@ public class PlayerMove : MonoBehaviour
     private Vector2 MoveDis = Vector2.zero;
     private float MoveDeadZone = 0.2f;
     [SerializeField]
-    private float speed = 4f;
+    private float speed = 6f;
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -45,16 +47,20 @@ public class PlayerMove : MonoBehaviour
         rb.velocity = new Vector3(MoveDis.x, 0, MoveDis.y) * speed;
 
         transform.rotation = Quaternion.LookRotation(rb.velocity);
-        //Debug.Log($"Move Input! & x:{MoveDis.x} / y:{MoveDis.y}");
-        //Debug.Log(rb.velocity.magnitude);
-        //Debug.Log("Move pressed!");
+
+        animator.SetFloat("Speed", rb.velocity.magnitude);
     }
 
     public void OutMove(InputAction.CallbackContext context)
     {
+        SpeedZero();
+    }
+
+    private void SpeedZero()
+    {
         MoveDis = Vector2.zero;
         rb.velocity = Vector3.zero;
-        //Debug.Log("Move released!");
+        animator.SetFloat("Speed", rb.velocity.magnitude);
     }
     #endregion
 
@@ -67,7 +73,7 @@ public class PlayerMove : MonoBehaviour
 
     private float AnaHoriTime = 1f;
 
-    float AnaSize = 5;
+    float AnaSize = 1;
 
     bool AnaHoribool = false;
 
@@ -87,13 +93,13 @@ public class PlayerMove : MonoBehaviour
         AnaHoribool = false;
     }
 
-    IEnumerator AnaHoriEndWait()
+    IEnumerator AnaHoriEndWait(bool AnaUme)
     {        
         // 開始時間を取得
         DateTime startTime = DateTime.Now;
 
         // 入力の終了 or 穴掘りに要する時間が過ぎたことを確認
-        yield return new WaitUntil(() => !AnaHoribool || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
+        yield return new WaitUntil(() => (!AnaHoribool && !AnaUme) || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
 
         AnaHoriEnd();
     }
@@ -103,37 +109,60 @@ public class PlayerMove : MonoBehaviour
         Input.EnableInput(PlayerInputNames.Move);
         nowAna = null;
 
+        animator.SetBool("IsDigging", false);
     }
 
-    public void AnaCheck()
+    private void AnaCheck()
     {
         Input.DisableInput(PlayerInputNames.Move);
-        StartCoroutine(AnaHoriEndWait());
+        
+        SpeedZero();
+
+        animator.SetBool("IsDigging", true);
+
+        bool AnaUme = false;
 
         // レイキャストの結果を格納する変数
         RaycastHit hit;
 
+        Vector3 pos = transform.position + (transform.forward * -0.1f);
+
+
         // レイキャストの実行
-        if (Physics.Raycast(transform.position + (transform.forward * -0.1f), transform.forward, out hit, AnaSize/2))
+        if (Physics.Raycast(pos, transform.forward, out hit, AnaSize*1.5f))
         {
             Debug.Log(hit.collider.gameObject.name);
             AnaAke anaAke = hit.collider.gameObject.GetComponent<AnaAke>();
             if (anaAke != null)
             {
-                anaAke.AnaUme(AnaHoriTime);
+                if (anaAke.Ume)
+                {
+                    AnaAke();
+                }
+                else
+                {
+                    anaAke.AnaUme(AnaHoriTime);
+                    AnaUme = true;
+                }
             }
         }
         else
         {
-            // 配置位置の計算
-            Vector3 spawnPosition = transform.position + transform.forward * (AnaSize * 0.6f);
-            // オブジェクトを生成
-            nowAna = Instantiate(Ana, spawnPosition, transform.rotation);
-            AnaAke anaAke = nowAna.GetComponent<AnaAke>();
-            anaAke.AnaHoriStart(AnaSize, AnaHoriTime);
-
-
+            AnaAke();
         }
+
+        StartCoroutine(AnaHoriEndWait(AnaUme));
+    }
+
+    private void AnaAke()
+    {
+        // 配置位置の計算
+        Vector3 spawnPosition = transform.position + transform.forward * (AnaSize * 1.25f);
+        spawnPosition.y += 0.5f;
+        // オブジェクトを生成
+        nowAna = Instantiate(Ana, spawnPosition, transform.rotation);
+        AnaAke anaAke = nowAna.GetComponent<AnaAke>();
+        anaAke.AnaHoriStart(AnaSize, AnaHoriTime);
     }
     #endregion
 }
