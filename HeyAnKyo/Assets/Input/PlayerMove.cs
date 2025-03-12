@@ -92,9 +92,8 @@ public class PlayerMove : MonoBehaviour
         // 開始時間を取得
         DateTime startTime = DateTime.Now;
 
+        // 入力の終了 or 穴掘りに要する時間が過ぎたことを確認
         yield return new WaitUntil(() => !AnaHoribool || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
-
-        Debug.Log((float)(startTime - DateTime.Now).TotalSeconds);
 
         AnaHoriEnd();
     }
@@ -127,8 +126,7 @@ public class PlayerMove : MonoBehaviour
         else
         {
             // 配置位置の計算
-            Vector3 spawnPosition = transform.position + transform.forward * (AnaSize / 2);
-
+            Vector3 spawnPosition = transform.position + transform.forward * (AnaSize * 0.6f);
             // オブジェクトを生成
             nowAna = Instantiate(Ana, spawnPosition, transform.rotation);
             AnaAke anaAke = nowAna.GetComponent<AnaAke>();
