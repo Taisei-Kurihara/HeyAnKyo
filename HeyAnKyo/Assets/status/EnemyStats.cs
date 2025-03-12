@@ -15,24 +15,21 @@ public class EnemyStats : MonoBehaviour
         if (anaAke.perfect)
         {
 
-            EnemyMove enemyMove = other.gameObject.GetComponent<EnemyMove>();
 
+            EnemyMove enemyMove = other.gameObject.GetComponent<EnemyMove>();
             // "enemy" タグのオブジェクトが "hole" に触れた場合
             if (enemyMove != null)
             {
-                enemyMove.Stop(this.transform);
 
                 // もし既に敵が捕まっていた場合
                 if (currentEnemy != null)
                 {
-                    Destroy(gameObject); // hole オブジェクトを削除
                     EnableMovement(currentEnemy); // 1体目の敵を即座に動かす
                     return; // 2体目は捕まえないので処理終了
                 }
 
-                // enemy を hole の子オブジェクトに設定（捕まえる）
-
                 currentEnemy = other.gameObject;
+                enemyMove.Stop(this.transform);
 
                 // 10秒後に動けるようにする処理をコルーチンで実行
                 StartCoroutine(EnableMovementAfterDelay(currentEnemy, UmeTime));
@@ -52,9 +49,8 @@ public class EnemyStats : MonoBehaviour
     {
         if (enemy != null)
         {
-            currentEnemy = null; // クリア
 
-            EnemyMove enemyMove = enemy.GetComponent<EnemyMove>();
+            EnemyMove enemyMove = enemy.gameObject.GetComponent<EnemyMove>();
             enemyMove.reMove();
             // hole オブジェクト（このスクリプトがアタッチされているオブジェクト）を削除
             Destroy(gameObject);

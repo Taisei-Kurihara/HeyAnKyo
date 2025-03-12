@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.HID;
+using UnityEngine.UIElements;
 
 public class EnemyMove : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class EnemyMove : MonoBehaviour
 
     // 巡回するポイント（ゴール）の配列
     [SerializeField]
-    private List<Transform> goals;
+    private List<GameObject> goals;
 
     // 現在向かっているゴールのインデックス
     private int destNum = 0;
@@ -51,7 +52,9 @@ public class EnemyMove : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
 
         // 最初の目的地を設定
-        agent.destination = goals[destNum].position;
+        Positions positions = Positions.Instance();
+        goals = positions.GetSpawnPoints;
+        agent.destination = goals[destNum].transform.position;
 
 
         capsuleCollider = GetComponent<CapsuleCollider>();
@@ -63,14 +66,19 @@ public class EnemyMove : MonoBehaviour
     {
         yield return new WaitForSeconds(1 / 30);
 
+        animator.SetFloat("Speed", 1);
+
         if (chasing[1]) { yield break; }
 
         if (!chasing[0])
         {
+            Positions positions = Positions.Instance();
             // 一定距離以内にプレイヤーが入ったら追跡を開始
-            if (Vector3.Distance(transform.position, targetPoint) < distanceToChase)
+            if (Vector3.Distance(transform.position, positions.Player.transform.position) < distanceToChase)
             {
                 chasing[0] = true;
+
+                agent.destination = positions.Player.transform.position;
                 StartCoroutine( PlayerStalker());
                 yield break;
             }
@@ -129,6 +137,7 @@ public class EnemyMove : MonoBehaviour
 
     public void Stop(Transform ana)
     {
+        animator.SetFloat("Speed",0);
         chasing[1] = true;
 
         transform.position = ana.transform.position;
@@ -147,6 +156,8 @@ public class EnemyMove : MonoBehaviour
         this.transform.localScale = Vector3.one;
         animator.SetBool("IsFallen", false);
 
+        capsuleCollider.enabled = true;
+
         chasing[1] = false;
         StartCoroutine(PlayerCheck());
     }
@@ -156,7 +167,7 @@ public class EnemyMove : MonoBehaviour
     {
         // ランダムに目的地を選択
         destNum = Random.Range(0, goals.Count);
-        agent.destination = goals[destNum].position;
+        agent.destination = goals[destNum].transform.position;
 
         capsuleCollider.enabled = true;
     }

@@ -13,7 +13,11 @@ public class PlayerMove : MonoBehaviour
     [SerializeField]
     Animator animator;
 
-
+    private void Awake()
+    {
+        Positions positions = Positions.Instance();
+        positions.Player = this.transform;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -28,9 +32,6 @@ public class PlayerMove : MonoBehaviour
     {
         return (Input.magnitude <= deadZone) ? Input = Vector2.zero : Input;
     }
-
-
-
 
     #region ˆÚ“®“ü—Í
 
