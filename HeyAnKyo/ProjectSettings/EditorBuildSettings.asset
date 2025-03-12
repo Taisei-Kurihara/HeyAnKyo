@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/title.unity
+    guid: 252c08efd91db4540b4dbdf3a909da52
+  - enabled: 1
+    path: Assets/Scenes/heiankyo.unity
+    guid: a6ade132ac2c5094892f022929b7b238
   m_configObjects: {}

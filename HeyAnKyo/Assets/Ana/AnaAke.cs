@@ -9,6 +9,7 @@ public class AnaAke : MonoBehaviour
     BitArray AnaHoribool = new BitArray(4,true);
 
     public bool Ume { get { return !AnaHoribool[1]; } }
+    public bool perfect { get { return !AnaHoribool[2]; } }
 
 
     float AnaSize = 5;

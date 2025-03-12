@@ -2,37 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem.HID;
 
-public class route : MonoBehaviour
+public class EnemyMove : MonoBehaviour
 {
+    [SerializeField]
+    Animator animator;
+
     // 敵の移動速度
-    public float movespeed;
+    private float movespeed;
 
     // 物理演算用のRigidbody
-    public Rigidbody theRB;
+    private Rigidbody theRB;
 
     // プレイヤーを追跡中かどうか
-    public bool chasing;
+    private bool chasing;
 
     // 追跡開始・停止・距離を保つためのしきい値
-    public float distanceToChase = 10f;  // プレイヤーを追跡し始める距離
-    public float distanceToLose = 15f;   // 追跡をやめる距離
-    public float distanceToStop = 2f;    // プレイヤーとの距離がこれ以下なら停止
+    private float distanceToChase = 10f;  // プレイヤーを追跡し始める距離
+    private float distanceToLose = 15f;   // 追跡をやめる距離
+    private float distanceToStop = 2f;    // プレイヤーとの距離がこれ以下なら停止
 
     // 目的地の位置情報
     private Vector3 targetPoint, startPoint;
 
     // NavMeshAgent（経路探索AI）
-    public NavMeshAgent agent;
+    private NavMeshAgent agent;
 
     // 巡回するポイント（ゴール）の配列
-    public Transform[] goals;
+    private Transform[] goals;
 
     // 現在向かっているゴールのインデックス
     private int destNum = 0;
 
     // 追跡を続ける時間
-    public float keepChasingTime = 5f;
+    private float keepChasingTime = 2f;
     private float chaseCounter;
 
     private void Start()
@@ -46,6 +50,15 @@ public class route : MonoBehaviour
         // 最初の目的地を設定
         agent.destination = goals[destNum].position;
     }
+
+    void PlayerCheck()
+    {
+        if (Vector3.Distance(transform.position, targetPoint) < distanceToChase)
+        {
+            chasing = true;
+        }
+    }
+
 
     private void Update()
     {
@@ -109,5 +122,20 @@ public class route : MonoBehaviour
         // ランダムに目的地を選択
         destNum = Random.Range(0, goals.Length);
         agent.destination = goals[destNum].position;
+    }
+
+
+
+    float UmeTime = 10;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        AnaAke anaAke = other.gameObject.GetComponent<AnaAke>();
+        if (anaAke != null)
+        {
+            transform.position = anaAke.transform.position;
+            transform.parent = anaAke.transform;
+            animator.SetTrigger("Falling");
+        }
     }
 }
