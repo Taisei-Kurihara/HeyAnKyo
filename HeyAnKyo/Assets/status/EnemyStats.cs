@@ -5,10 +5,14 @@ public class EnemyStats : MonoBehaviour
 {
     private GameObject currentEnemy = null; // 現在の親になっている敵（捕まえた敵）
 
+    float UmeTime = 10;
+
+
     void OnTriggerEnter(Collider other)
     {
+        EnemyMove enemyMove = other.GetComponent<EnemyMove>();
         // "enemy" タグのオブジェクトが "hole" に触れた場合
-        if (other.CompareTag("enemy") && gameObject.CompareTag("hole"))
+        if (enemyMove != null)
         {
             // もし既に敵が捕まっていた場合
             if (currentEnemy != null)
@@ -20,17 +24,11 @@ public class EnemyStats : MonoBehaviour
 
             // enemy を hole の子オブジェクトに設定（捕まえる）
             currentEnemy = other.gameObject;
+            currentEnemy.transform.position = this.transform.position;
             currentEnemy.transform.parent = this.transform;
 
-            // 10秒間動けなくする（物理演算を無効化）
-            Rigidbody enemyRb = currentEnemy.GetComponent<Rigidbody>();
-            if (enemyRb != null)
-            {
-                enemyRb.isKinematic = true; // 敵を停止させる
-            }
-
             // 10秒後に動けるようにする処理をコルーチンで実行
-            StartCoroutine(EnableMovementAfterDelay(currentEnemy, 10f));
+            StartCoroutine(EnableMovementAfterDelay(currentEnemy, UmeTime));
         }
     }
 
@@ -46,12 +44,6 @@ public class EnemyStats : MonoBehaviour
     {
         if (enemy != null)
         {
-            // 敵の Rigidbody を取得して動けるようにする
-            Rigidbody enemyRb = enemy.GetComponent<Rigidbody>();
-            if (enemyRb != null)
-            {
-                enemyRb.isKinematic = false; // 物理演算を再開（動けるようにする）
-            }
             enemy.transform.parent = null; // 親子関係を解除
             currentEnemy = null; // クリア
 

@@ -30,7 +30,8 @@ public class EnemyMove : MonoBehaviour
     private NavMeshAgent agent;
 
     // 巡回するポイント（ゴール）の配列
-    private Transform[] goals;
+    [SerializeField]
+    private List<Transform> goals;
 
     // 現在向かっているゴールのインデックス
     private int destNum = 0;
@@ -57,6 +58,15 @@ public class EnemyMove : MonoBehaviour
         {
             chasing = true;
         }
+        else
+        {
+
+        }
+    }
+
+    public void Stop()
+    {
+        agent.destination = transform.position;
     }
 
 
