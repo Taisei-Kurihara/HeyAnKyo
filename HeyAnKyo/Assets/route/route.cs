@@ -50,7 +50,7 @@ public class route : MonoBehaviour
     private void Update()
     {
         // プレイヤーの現在位置を取得（Y座標は変えずに地面と同じ高さにする）
-        targetPoint = PlayerController.instance.transform.position;
+        //targetPoint = PlayerController.instance.transform.position; コメントアウト中
         targetPoint.y = transform.position.y;
 
         // 追跡していない場合の処理
