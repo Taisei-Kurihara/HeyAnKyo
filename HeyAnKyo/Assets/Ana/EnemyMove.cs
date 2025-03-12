@@ -16,7 +16,7 @@ public class EnemyMove : MonoBehaviour
     private Rigidbody theRB;
 
     // プレイヤーを追跡中かどうか
-    private bool chasing;
+    private BitArray chasing = new BitArray(2,false);
 
     // 追跡開始・停止・距離を保つためのしきい値
     private float distanceToChase = 10f;  // プレイヤーを追跡し始める距離
@@ -40,6 +40,8 @@ public class EnemyMove : MonoBehaviour
     private float keepChasingTime = 2f;
     private float chaseCounter;
 
+    CapsuleCollider capsuleCollider;
+
     private void Start()
     {
         // 初期位置を記録
@@ -50,39 +52,27 @@ public class EnemyMove : MonoBehaviour
 
         // 最初の目的地を設定
         agent.destination = goals[destNum].position;
+
+
+        capsuleCollider = GetComponent<CapsuleCollider>();
+
+        StartCoroutine(PlayerCheck());
     }
 
-    void PlayerCheck()
+    IEnumerator PlayerCheck()
     {
-        if (Vector3.Distance(transform.position, targetPoint) < distanceToChase)
-        {
-            chasing = true;
-        }
-        else
-        {
+        yield return new WaitForSeconds(1 / 30);
 
-        }
-    }
+        if (chasing[1]) { yield break; }
 
-    public void Stop()
-    {
-        agent.destination = transform.position;
-    }
-
-
-    private void Update()
-    {
-        // プレイヤーの現在位置を取得（Y座標は変えずに地面と同じ高さにする）
-        //targetPoint = PlayerController.instance.transform.position; //コメントアウト
-        targetPoint.y = transform.position.y;
-
-        // 追跡していない場合の処理
-        if (!chasing)
+        if (!chasing[0])
         {
             // 一定距離以内にプレイヤーが入ったら追跡を開始
             if (Vector3.Distance(transform.position, targetPoint) < distanceToChase)
             {
-                chasing = true;
+                chasing[0] = true;
+                StartCoroutine( PlayerStalker());
+                yield break;
             }
 
             // 追跡終了後のカウントダウン
@@ -100,11 +90,18 @@ public class EnemyMove : MonoBehaviour
             if (agent.remainingDistance < 0.5f)
             {
                 nextGoal();
-                // 次のゴールへの移動を3.5秒後に実行する場合（コメントアウト）
-                // Invoke(nameof(nextGoal), 3.5f);
             }
+
+            StartCoroutine(PlayerCheck());
         }
-        else // 追跡中の処理
+    }
+
+    IEnumerator PlayerStalker()
+    {
+        yield return new WaitForSeconds(1/30);
+        if (chasing[1]) { yield break; }
+
+        if (chasing[0])
         {
             // プレイヤーが一定距離より遠い場合、プレイヤーを追いかける
             if (Vector3.Distance(transform.position, targetPoint) > distanceToStop)
@@ -120,32 +117,47 @@ public class EnemyMove : MonoBehaviour
             // プレイヤーが一定距離を超えて離れたら追跡をやめる
             if (Vector3.Distance(transform.position, targetPoint) > distanceToLose)
             {
-                chasing = false;
+                chasing[0] = false;
                 chaseCounter = keepChasingTime; // 追跡を再開するまでのカウントダウンを開始
+                StartCoroutine(PlayerCheck());
+                yield break;
             }
+
+            StartCoroutine(PlayerStalker());
         }
+    }
+
+    public void Stop(Transform ana)
+    {
+        chasing[1] = true;
+
+        transform.position = ana.transform.position;
+        transform.parent = ana.transform;
+        animator.SetBool("IsFallen", true);
+        animator.SetTrigger("Falling");
+
+        capsuleCollider.enabled = false;
+
+        agent.destination = transform.position;
+    }
+
+    public void reMove()
+    {
+        this.transform.parent = null; // 親子関係を解除
+        this.transform.localScale = Vector3.one;
+        animator.SetBool("IsFallen", false);
+
+        chasing[1] = false;
+        StartCoroutine(PlayerCheck());
     }
 
     // 次の目的地を設定する処理
     void nextGoal()
     {
         // ランダムに目的地を選択
-        destNum = Random.Range(0, goals.Length);
+        destNum = Random.Range(0, goals.Count);
         agent.destination = goals[destNum].position;
-    }
 
-
-
-    float UmeTime = 10;
-
-    private void OnTriggerEnter(Collider other)
-    {
-        AnaAke anaAke = other.gameObject.GetComponent<AnaAke>();
-        if (anaAke != null)
-        {
-            transform.position = anaAke.transform.position;
-            transform.parent = anaAke.transform;
-            animator.SetTrigger("Falling");
-        }
+        capsuleCollider.enabled = true;
     }
 }

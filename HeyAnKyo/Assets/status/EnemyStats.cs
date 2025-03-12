@@ -10,25 +10,33 @@ public class EnemyStats : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        EnemyMove enemyMove = other.GetComponent<EnemyMove>();
-        // "enemy" タグのオブジェクトが "hole" に触れた場合
-        if (enemyMove != null)
+        AnaAke anaAke = this.GetComponent<AnaAke>();
+        
+        if (anaAke.perfect)
         {
-            // もし既に敵が捕まっていた場合
-            if (currentEnemy != null)
+
+            EnemyMove enemyMove = other.gameObject.GetComponent<EnemyMove>();
+
+            // "enemy" タグのオブジェクトが "hole" に触れた場合
+            if (enemyMove != null)
             {
-                Destroy(gameObject); // hole オブジェクトを削除
-                EnableMovement(currentEnemy); // 1体目の敵を即座に動かす
-                return; // 2体目は捕まえないので処理終了
+                enemyMove.Stop(this.transform);
+
+                // もし既に敵が捕まっていた場合
+                if (currentEnemy != null)
+                {
+                    Destroy(gameObject); // hole オブジェクトを削除
+                    EnableMovement(currentEnemy); // 1体目の敵を即座に動かす
+                    return; // 2体目は捕まえないので処理終了
+                }
+
+                // enemy を hole の子オブジェクトに設定（捕まえる）
+
+                currentEnemy = other.gameObject;
+
+                // 10秒後に動けるようにする処理をコルーチンで実行
+                StartCoroutine(EnableMovementAfterDelay(currentEnemy, UmeTime));
             }
-
-            // enemy を hole の子オブジェクトに設定（捕まえる）
-            currentEnemy = other.gameObject;
-            currentEnemy.transform.position = this.transform.position;
-            currentEnemy.transform.parent = this.transform;
-
-            // 10秒後に動けるようにする処理をコルーチンで実行
-            StartCoroutine(EnableMovementAfterDelay(currentEnemy, UmeTime));
         }
     }
 
@@ -44,9 +52,10 @@ public class EnemyStats : MonoBehaviour
     {
         if (enemy != null)
         {
-            enemy.transform.parent = null; // 親子関係を解除
             currentEnemy = null; // クリア
 
+            EnemyMove enemyMove = enemy.GetComponent<EnemyMove>();
+            enemyMove.reMove();
             // hole オブジェクト（このスクリプトがアタッチされているオブジェクト）を削除
             Destroy(gameObject);
         }

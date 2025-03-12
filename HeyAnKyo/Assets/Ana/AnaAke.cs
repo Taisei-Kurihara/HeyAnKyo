@@ -60,6 +60,7 @@ public class AnaAke : MonoBehaviour
                     AnaHoribool[2] = false;
                     yield return new WaitUntil(() => !AnaHoribool[1]);
                     AnaHoribool[0] = true;
+                    AnaHoribool[2] = true;
                     StartCoroutine(FadeWait(maxTime * -1, AbsmaxTime));
                 }
                 else

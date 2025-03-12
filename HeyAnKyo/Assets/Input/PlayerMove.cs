@@ -126,10 +126,10 @@ public class PlayerMove : MonoBehaviour
         RaycastHit hit;
 
         Vector3 pos = transform.position + (transform.forward * -0.1f);
-
+        pos.y = 1f;
 
         // レイキャストの実行
-        if (Physics.Raycast(pos, transform.forward, out hit, AnaSize*1.5f))
+        if (Physics.Raycast(pos, transform.forward, out hit, AnaSize*2f))
         {
             Debug.Log(hit.collider.gameObject.name);
             AnaAke anaAke = hit.collider.gameObject.GetComponent<AnaAke>();
