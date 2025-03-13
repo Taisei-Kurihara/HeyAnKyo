@@ -17,7 +17,9 @@ public class EnemyMove : MonoBehaviour
     private Rigidbody theRB;
 
     // プレイヤーを追跡中かどうか
-    private BitArray chasing = new BitArray(2,false);
+    private BitArray chasing = new BitArray(3,false);
+
+    public bool Deadcheck { set { chasing[2] = value; } }
 
     // 追跡開始・停止・距離を保つためのしきい値
     private float distanceToChase = 10f;  // プレイヤーを追跡し始める距離
@@ -70,38 +72,36 @@ public class EnemyMove : MonoBehaviour
 
         if (chasing[1]) { yield break; }
 
-        if (!chasing[0])
+        Positions positions = Positions.Instance();
+        // 一定距離以内にプレイヤーが入ったら追跡を開始
+        if (Vector3.Distance(transform.position, positions.Player.transform.position) < distanceToChase && !chasing[2])
         {
-            Positions positions = Positions.Instance();
-            // 一定距離以内にプレイヤーが入ったら追跡を開始
-            if (Vector3.Distance(transform.position, positions.Player.transform.position) < distanceToChase)
-            {
-                chasing[0] = true;
+            chasing[0] = true;
 
-                agent.destination = positions.Player.transform.position;
-                StartCoroutine( PlayerStalker());
-                yield break;
-            }
+            agent.destination = positions.Player.transform.position;
+            StartCoroutine( PlayerStalker());
+            yield break;
+        }
 
-            // 追跡終了後のカウントダウン
-            if (chaseCounter > 0)
+        // 追跡終了後のカウントダウン
+        if (chaseCounter > 0)
+        {
+            chaseCounter -= Time.deltaTime;
+            if (chaseCounter <= 0)
             {
-                chaseCounter -= Time.deltaTime;
-                if (chaseCounter <= 0)
-                {
-                    // 次のゴールへ移動
-                    nextGoal();
-                }
-            }
-
-            // 目的地に到達したら次のゴールへ移動
-            if (agent.remainingDistance < 0.5f)
-            {
+                // 次のゴールへ移動
                 nextGoal();
             }
-
-            StartCoroutine(PlayerCheck());
         }
+
+        // 目的地に到達したら次のゴールへ移動
+        if (agent.remainingDistance < 0.5f)
+        {
+            nextGoal();
+        }
+
+        StartCoroutine(PlayerCheck());
+        
     }
 
     IEnumerator PlayerStalker()
@@ -109,30 +109,30 @@ public class EnemyMove : MonoBehaviour
         yield return new WaitForSeconds(1/30);
         if (chasing[1]) { yield break; }
 
-        if (chasing[0])
+        if (chasing[2]) { StartCoroutine(PlayerStalker()); }
+
+        // プレイヤーが一定距離より遠い場合、プレイヤーを追いかける
+        if (Vector3.Distance(transform.position, targetPoint) > distanceToStop)
         {
-            // プレイヤーが一定距離より遠い場合、プレイヤーを追いかける
-            if (Vector3.Distance(transform.position, targetPoint) > distanceToStop)
-            {
-                agent.destination = targetPoint;
-            }
-            else
-            {
-                // プレイヤーとの距離が近すぎる場合はその場に留まる
-                agent.destination = transform.position;
-            }
-
-            // プレイヤーが一定距離を超えて離れたら追跡をやめる
-            if (Vector3.Distance(transform.position, targetPoint) > distanceToLose)
-            {
-                chasing[0] = false;
-                chaseCounter = keepChasingTime; // 追跡を再開するまでのカウントダウンを開始
-                StartCoroutine(PlayerCheck());
-                yield break;
-            }
-
-            StartCoroutine(PlayerStalker());
+            agent.destination = targetPoint;
         }
+        else
+        {
+            // プレイヤーとの距離が近すぎる場合はその場に留まる
+            agent.destination = transform.position;
+        }
+
+        // プレイヤーが一定距離を超えて離れたら追跡をやめる
+        if (Vector3.Distance(transform.position, targetPoint) > distanceToLose)
+        {
+            chasing[0] = false;
+            chaseCounter = keepChasingTime; // 追跡を再開するまでのカウントダウンを開始
+            StartCoroutine(PlayerCheck());
+            yield break;
+        }
+
+        StartCoroutine(PlayerStalker());
+        
     }
 
     public void Stop(Transform ana)
@@ -154,11 +154,13 @@ public class EnemyMove : MonoBehaviour
     {
         this.transform.parent = null; // 親子関係を解除
         this.transform.localScale = Vector3.one;
+
+        chasing = new BitArray(3, false);
+
         animator.SetBool("IsFallen", false);
 
         capsuleCollider.enabled = true;
 
-        chasing[1] = false;
         StartCoroutine(PlayerCheck());
     }
 

@@ -16,6 +16,8 @@ public class SceneChange : MonoBehaviour
 
     void ChangeScene()
     {
+        Positions positions = Positions.Instance();
+        positions.Reset();
         SceneManager.LoadScene("heiankyo");
     }
 }

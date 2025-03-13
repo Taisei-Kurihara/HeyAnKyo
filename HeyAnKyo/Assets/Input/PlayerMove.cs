@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine.InputSystem.HID;
 public class PlayerMove : MonoBehaviour
 {
-    Input Input;
+    Input input;
     Rigidbody rb;
 
     [SerializeField]
@@ -21,9 +21,9 @@ public class PlayerMove : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Input = GetComponent<Input>();
-        Input.MethodSetting(PlayerInputNames.Move,ActionSettype.plus, OnMove, OutMove);
-        Input.MethodSetting(PlayerInputNames.An,ActionSettype.plus, OnAnaHori, OutAnaHori);
+        input = GetComponent<Input>();
+        input.MethodSetting(PlayerInputNames.Move,ActionSettype.plus, OnMove, OutMove);
+        input.MethodSetting(PlayerInputNames.An,ActionSettype.plus, OnAnaHori, OutAnaHori);
 
         rb = GetComponent<Rigidbody>();
     }
@@ -43,7 +43,7 @@ public class PlayerMove : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        MoveDis = DeadZone(Input.inputActions[(int)PlayerInputNames.Move].ReadValue<Vector2>(), MoveDeadZone);
+        MoveDis = DeadZone(input.inputActions[(int)PlayerInputNames.Move].ReadValue<Vector2>(), MoveDeadZone);
 
         rb.velocity = new Vector3(MoveDis.x, 0, MoveDis.y) * speed;
 
@@ -76,11 +76,11 @@ public class PlayerMove : MonoBehaviour
 
     float AnaSize = 1;
 
-    bool AnaHoribool = false;
+    BitArray AnaHoribool = new BitArray(2,false);
 
     public void OnAnaHori(InputAction.CallbackContext context)
     {
-        AnaHoribool = true;
+        AnaHoribool[0] = true;
         AnaCheck();
     }
 
@@ -91,7 +91,7 @@ public class PlayerMove : MonoBehaviour
             anaAke.AnaUme(AnaHoriTime);
         }
 
-        AnaHoribool = false;
+        AnaHoribool[0] = false;
     }
 
     IEnumerator AnaHoriEndWait(bool AnaUme)
@@ -100,14 +100,14 @@ public class PlayerMove : MonoBehaviour
         DateTime startTime = DateTime.Now;
 
         // 入力の終了 or 穴掘りに要する時間が過ぎたことを確認
-        yield return new WaitUntil(() => (!AnaHoribool && !AnaUme) || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
-
+        yield return new WaitUntil(() => (!AnaHoribool[0] && !AnaUme) || (float)(DateTime.Now - startTime).TotalSeconds > AnaHoriTime);
+        yield return new WaitUntil(() => !AnaHoribool[1]);
         AnaHoriEnd();
     }
 
     void AnaHoriEnd()
     {
-        Input.EnableInput(PlayerInputNames.Move);
+        input.EnableInput(PlayerInputNames.Move);
         nowAna = null;
 
         animator.SetBool("IsDigging", false);
@@ -115,7 +115,7 @@ public class PlayerMove : MonoBehaviour
 
     private void AnaCheck()
     {
-        Input.DisableInput(PlayerInputNames.Move);
+        input.DisableInput(PlayerInputNames.Move);
         
         SpeedZero();
 
@@ -166,4 +166,19 @@ public class PlayerMove : MonoBehaviour
         anaAke.AnaHoriStart(AnaSize, AnaHoriTime);
     }
     #endregion
+
+    public void Dead()
+    {
+        AnaHoribool[1] = true;
+        animator.SetBool("IsDead", true);
+        animator.SetTrigger("Dead");
+        input.AllOff();
+    }
+
+    public void Revival()
+    {
+        AnaHoribool[1] = false;
+        animator.SetBool("IsDead", false);
+        input.AllOn();
+    }
 }

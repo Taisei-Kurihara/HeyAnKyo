@@ -12,5 +12,9 @@ public class Positions : SingletonMonoBehaviourBase<Positions>
     public List<GameObject> GetSpawnPoints {  get { return spawnPoints; } }
     public GameObject SetSpawnPoints {  set { spawnPoints.Add(value); } }
 
-
+    public void Reset()
+    {
+        player = null;
+        spawnPoints = new List<GameObject>();
+    }
 }
