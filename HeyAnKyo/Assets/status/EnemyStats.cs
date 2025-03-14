@@ -7,15 +7,12 @@ public class EnemyStats : MonoBehaviour
 
     float UmeTime = 10;
 
-
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         AnaAke anaAke = this.GetComponent<AnaAke>();
         
         if (anaAke.perfect)
         {
-
-
             EnemyMove enemyMove = other.gameObject.GetComponent<EnemyMove>();
             // "enemy" タグのオブジェクトが "hole" に触れた場合
             if (enemyMove != null)

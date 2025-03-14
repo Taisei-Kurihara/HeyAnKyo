@@ -86,7 +86,7 @@ public class EnemyRespown : MonoBehaviour
         if (status != null)
         {
             status.SetEnemyRespown = this.gameObject.GetComponent<EnemyRespown>();
-            if (status.CharType == CharType.Player)
+            if (status is PlayerStatus)
             {
                 Camera.player = x.transform;
                 playerPos = x.transform;
