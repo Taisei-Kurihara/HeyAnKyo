@@ -17,6 +17,7 @@ public class PlayerMove : MonoBehaviour
     {
         Positions positions = Positions.Instance();
         positions.Player = this.transform;
+
     }
     // Start is called before the first frame update
     void Start()
@@ -43,7 +44,7 @@ public class PlayerMove : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        MoveDis = DeadZone(input.inputActions[(int)PlayerInputNames.Move].ReadValue<Vector2>(), MoveDeadZone);
+        MoveDis = DeadZone(context.ReadValue<Vector2>(), MoveDeadZone);
 
         rb.velocity = new Vector3(MoveDis.x, 0, MoveDis.y) * speed;
 

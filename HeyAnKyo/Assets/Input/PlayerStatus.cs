@@ -19,25 +19,20 @@ public class PlayerStatus : Status
 
     public void HPchange(float damage)
     {
-        if((float)(DateTime.Now - startTime).TotalSeconds < 3 && respown.GetUI.isDead) { return; }
+        if((float)(DateTime.Now - startTime).TotalSeconds < 3 || respown.GetUI.isDead) { return; }
         hp = (hp - damage < 0) ? 0 : hp - damage;
         respown.GetUI.SetHP = hp;
+
+        if (damage > 0)
+        {
+            playerMove.Dead();
+        }
 
         if (hp <= 0)
         {
             respown.GetUI.GameOverFlag();
         }
         else if(damage > 0)
-        {
-            Kill();
-        }
-    }
-
-    public void Kill()
-    {
-        playerMove.Dead();
-        
-        if(hp > 0)
         {
             respown.GetUI.isDead = true;
             StartCoroutine(RevivalWait());

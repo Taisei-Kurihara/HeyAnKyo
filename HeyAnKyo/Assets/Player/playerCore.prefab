@@ -487,7 +487,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: 66011d656d45789438f3cb4d82899103, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -498,7 +498,15 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 46f370cb-69f4-4fe8-9e3e-08992ca782f0
+    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/XInputControllerWindows/leftStick]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b218350a-07af-4018-b95f-da90bca74496
+    m_ActionName: Player/An[/XInputControllerWindows/rightShoulder,/Keyboard/space,/Mouse/leftButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -539,8 +547,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a847dc23c1e2a94c80fee269d3e5bd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
-  score: 100
 --- !u!1 &5426038893754167389
 GameObject:
   m_ObjectHideFlags: 0

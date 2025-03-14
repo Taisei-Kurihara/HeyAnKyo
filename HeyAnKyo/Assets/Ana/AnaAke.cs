@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class AnaAke : MonoBehaviour
 {
-
-
     BitArray AnaHoribool = new BitArray(4,true);
+
+    EnemyStats enemyStats;
 
     public bool Ume { get { return !AnaHoribool[1]; } }
     public bool perfect { get { return !AnaHoribool[2]; } }
@@ -16,6 +16,7 @@ public class AnaAke : MonoBehaviour
 
     public void AnaHoriStart(float AnaSize, float AnaHoriTime)
     {
+        enemyStats = GetComponent<EnemyStats>();
         this.AnaSize = AnaSize;
         StartCoroutine(FadeWait(AnaHoriTime, AnaHoriTime));
     }
@@ -29,6 +30,13 @@ public class AnaAke : MonoBehaviour
         }
 
         AnaHoribool[3] = false;
+
+        if (!AnaHoribool[2])
+        {
+            AnaHoribool[0] = true;
+            AnaHoribool[2] = true;
+            StartCoroutine(FadeWait(AnaHoriTime * -1, AnaHoriTime));
+        }
     }
 
     /// <summary>
@@ -58,14 +66,10 @@ public class AnaAke : MonoBehaviour
                 if (AnaHoribool[1])
                 {
                     AnaHoribool[2] = false;
-                    yield return new WaitUntil(() => !AnaHoribool[1]);
-                    AnaHoribool[0] = true;
-                    AnaHoribool[2] = true;
-                    StartCoroutine(FadeWait(maxTime * -1, AbsmaxTime));
                 }
                 else
                 {
-                    Destroy(gameObject);
+                    enemyStats.Kill();
                 }
             }
         }

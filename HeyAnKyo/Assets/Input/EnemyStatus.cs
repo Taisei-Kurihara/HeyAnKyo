@@ -3,6 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.Progress;
+
+[System.Serializable]
+class DropItem
+{
+    [SerializeField]
+    GameObject Item;
+
+    public GameObject GetItem { get { return Item; }}
+
+    [SerializeField, Header("n/100")]
+    float percent = 8f;
+
+    int leverage = 1000;
+    public bool AdventSelection()
+    {
+        if((UnityEngine.Random.Range(0, (100 * leverage) + 1) / leverage) <= percent)
+        {
+            return true;
+        }
+        return false;
+    }
+}
 
 public class EnemyStatus : Status
 {
@@ -15,18 +39,27 @@ public class EnemyStatus : Status
     [SerializeField]
     int score = 100;
 
+    [SerializeField]
+    List<DropItem> dropItems;
+
     private void Start()
     {
         enemyMove = GetComponent<EnemyMove>();
+        enemyMove.Firststep();
         StartCoroutine(Deadcheck());
     }
 
-    void OnDestroy()
+    public void Dead()
     {
-        if (type == CharType.Enemy)
+        respown.currentEnemiesCount(-1);
+        respown.GetUI.addscore = score;
+
+        foreach (DropItem item in dropItems)
         {
-            respown.currentEnemiesCount(-1);
-            respown.GetUI.addscore = score;
+            if(item.AdventSelection())
+            {
+                Instantiate(item.GetItem, this.transform.position, Quaternion.identity);
+            }
         }
     }
 

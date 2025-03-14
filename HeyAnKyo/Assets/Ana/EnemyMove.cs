@@ -11,7 +11,8 @@ public class EnemyMove : MonoBehaviour
     Animator animator;
 
     // 敵の移動速度
-    private float movespeed;
+    [SerializeField]
+    private float movespeed = 3;
 
     // 物理演算用のRigidbody
     private Rigidbody theRB;
@@ -22,8 +23,11 @@ public class EnemyMove : MonoBehaviour
     public bool Deadcheck { set { chasing[2] = value; } }
 
     // 追跡開始・停止・距離を保つためのしきい値
+    [SerializeField]
     private float distanceToChase = 10f;  // プレイヤーを追跡し始める距離
-    private float distanceToLose = 15f;   // 追跡をやめる距離
+    [SerializeField]
+    private float distanceToLose = 15f;   // 
+    [SerializeField]
     private float distanceToStop = 2f;    // プレイヤーとの距離がこれ以下なら停止
 
     // 目的地の位置情報
@@ -33,35 +37,43 @@ public class EnemyMove : MonoBehaviour
     private NavMeshAgent agent;
 
     // 巡回するポイント（ゴール）の配列
-    [SerializeField]
     private List<GameObject> goals;
 
     // 現在向かっているゴールのインデックス
     private int destNum = 0;
 
     // 追跡を続ける時間
+    [SerializeField]
     private float keepChasingTime = 2f;
     private float chaseCounter;
 
     CapsuleCollider capsuleCollider;
 
-    private void Start()
+    public void SpeedSetting()
     {
-        // 初期位置を記録
-        startPoint = transform.position;
+        agent.speed = this.movespeed;
+        agent.acceleration = this.movespeed * 2;
+    }
 
-        // NavMeshAgentコンポーネントを取得
+    public void Firststep()
+    {
+        capsuleCollider = GetComponent<CapsuleCollider>();
         agent = GetComponent<NavMeshAgent>();
 
+        SpeedSetting();
+
+        // 初期位置を記録
+        startPoint = transform.position;
+        
         // 最初の目的地を設定
         Positions positions = Positions.Instance();
         goals = positions.GetSpawnPoints;
         agent.destination = goals[destNum].transform.position;
 
 
-        capsuleCollider = GetComponent<CapsuleCollider>();
 
         StartCoroutine(PlayerCheck());
+
     }
 
     IEnumerator PlayerCheck()

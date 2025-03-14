@@ -958,7 +958,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 1141764909504536178}
-  goals: []
+  NavMeshAgent: {fileID: 4438360239375521202}
+  movespeed: 3
+  distanceToChase: 10
+  distanceToLose: 11
+  distanceToStop: 2
+  keepChasingTime: 0
 --- !u!54 &6753889168705502651
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1020,6 +1025,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3667abd1e400eca4fbf95997343fed47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  score: 100
+  dropItems:
+  - Item: {fileID: 999467462860599405, guid: caedb119513b3e34887bc85b79afe015, type: 3}
+    percent: 16
 --- !u!1 &7272744781127265879
 GameObject:
   m_ObjectHideFlags: 0

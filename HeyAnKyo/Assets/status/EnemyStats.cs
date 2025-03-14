@@ -5,7 +5,7 @@ public class EnemyStats : MonoBehaviour
 {
     private GameObject currentEnemy = null; // 現在の親になっている敵（捕まえた敵）
 
-    float UmeTime = 10;
+    float UmeTime = 5;
 
     private void OnTriggerStay(Collider other)
     {
@@ -34,6 +34,16 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
+    public void Kill()
+    {
+        if (currentEnemy != null)
+        {
+            EnemyStatus enemyStatus = currentEnemy.GetComponent<EnemyStatus>();
+            enemyStatus.Dead();
+            Destroy(gameObject);
+        }
+    }
+
     // 10秒後に敵の動きを再開する
     IEnumerator EnableMovementAfterDelay(GameObject enemy, float delay)
     {
@@ -46,7 +56,6 @@ public class EnemyStats : MonoBehaviour
     {
         if (enemy != null)
         {
-
             EnemyMove enemyMove = enemy.gameObject.GetComponent<EnemyMove>();
             enemyMove.reMove();
             // hole オブジェクト（このスクリプトがアタッチされているオブジェクト）を削除

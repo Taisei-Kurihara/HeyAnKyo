@@ -35,6 +35,7 @@ public class Input : MonoBehaviour
     {
         input = GetComponent<PlayerInput>();
         SetUp();
+
     }
 
     protected void SetUp() { SetUp(PlayerInputNames.Set); }
